@@ -50,29 +50,40 @@ function HomePage() {
   const [contactFeedback, setContactFeedback] = useState('')
 
   useEffect(() => {
+    let isActive = true
     const abortController = new AbortController()
 
     const loadData = async () => {
-      setLoading(true)
-      setErrorMessage('')
+      if (isActive) {
+        setLoading(true)
+        setErrorMessage('')
+      }
 
       try {
         const home = await getHomeData({ signal: abortController.signal })
         const products = home?.allProducts ?? []
+        if (!isActive) {
+          return
+        }
         setHomeData(home)
         setAllProducts(products)
       } catch (error) {
-        if (error.name !== 'AbortError') {
+        if (isActive && error.name !== 'AbortError') {
           setErrorMessage('Could not load data. Please check backend API status.')
         }
       } finally {
-        setLoading(false)
+        if (isActive) {
+          setLoading(false)
+        }
       }
     }
 
     loadData()
 
-    return () => abortController.abort()
+    return () => {
+      isActive = false
+      abortController.abort()
+    }
   }, [])
 
   const filteredProducts = useMemo(() => {
@@ -111,6 +122,10 @@ function HomePage() {
 
   if (errorMessage) {
     return <main className="page-status error">{errorMessage}</main>
+  }
+
+  if (!homeData) {
+    return <main className="page-status">Loading new MADS experience...</main>
   }
 
   return (
@@ -296,29 +311,40 @@ function ProductCategoryPage({ slug }) {
   const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
+    let isActive = true
     const abortController = new AbortController()
 
     const loadData = async () => {
-      setLoading(true)
-      setErrorMessage('')
+      if (isActive) {
+        setLoading(true)
+        setErrorMessage('')
+      }
       try {
         const [home, categoryProducts] = await Promise.all([
           getHomeData({ signal: abortController.signal }),
           getProductsByCategorySlug(slug, { signal: abortController.signal }),
         ])
+        if (!isActive) {
+          return
+        }
         setHomeData(home)
         setProducts(categoryProducts)
       } catch (error) {
-        if (error.name !== 'AbortError') {
+        if (isActive && error.name !== 'AbortError') {
           setErrorMessage('Could not load category products. Please check backend API status.')
         }
       } finally {
-        setLoading(false)
+        if (isActive) {
+          setLoading(false)
+        }
       }
     }
 
     loadData()
-    return () => abortController.abort()
+    return () => {
+      isActive = false
+      abortController.abort()
+    }
   }, [slug])
 
   const category = useMemo(
