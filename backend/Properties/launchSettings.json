@@ -18,7 +18,8 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ConnectionStrings__DefaultConnection": "Host=localhost;Port=5432;Database=madsdb;Username=postgres;Password=postgres",
-        "Frontend__Origin": "http://localhost:5173"
+        "Frontend__Origin": "http://localhost:5173",
+        "Admin__ApiKey": "mads-admin-dev-key"
       }
     },
     "https": {
@@ -30,7 +31,8 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ConnectionStrings__DefaultConnection": "Host=localhost;Port=5432;Database=madsdb;Username=postgres;Password=postgres",
-        "Frontend__Origin": "http://localhost:5173"
+        "Frontend__Origin": "http://localhost:5173",
+        "Admin__ApiKey": "mads-admin-dev-key"
       }
     },
     "IIS Express": {
@@ -40,7 +42,8 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ConnectionStrings__DefaultConnection": "Host=localhost;Port=5432;Database=madsdb;Username=postgres;Password=postgres",
-        "Frontend__Origin": "http://localhost:5173"
+        "Frontend__Origin": "http://localhost:5173",
+        "Admin__ApiKey": "mads-admin-dev-key"
       }
     }
   }

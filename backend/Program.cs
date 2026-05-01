@@ -21,6 +21,9 @@ builder.Services.AddCors(options =>
     });
 });
 
+var adminApiKey = builder.Configuration["Admin:ApiKey"] ?? "change-me-admin-key";
+builder.Services.AddSingleton(new AdminApiOptions(adminApiKey));
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -38,7 +41,31 @@ using (var scope = app.Services.CreateScope())
 
 app.UseHttpsRedirection();
 app.UseCors("frontend");
+app.UseMiddleware<AdminApiKeyMiddleware>();
 app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+public sealed record AdminApiOptions(string ApiKey);
+
+public sealed class AdminApiKeyMiddleware(RequestDelegate next, AdminApiOptions options)
+{
+    private const string HeaderName = "X-Admin-Api-Key";
+
+    public async Task InvokeAsync(HttpContext context)
+    {
+        if (context.Request.Path.StartsWithSegments("/api/admin", StringComparison.OrdinalIgnoreCase))
+        {
+            var providedKey = context.Request.Headers[HeaderName].FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(providedKey) || !string.Equals(providedKey, options.ApiKey, StringComparison.Ordinal))
+            {
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                await context.Response.WriteAsJsonAsync(new { message = "Unauthorized admin request." });
+                return;
+            }
+        }
+
+        await next(context);
+    }
+}

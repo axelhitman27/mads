@@ -1,56 +1,77 @@
-# MADS Redesign Prototype
+# MADS E-Shop + Service Platform
 
-Full-stack prototype for a redesigned e-scooter/e-bike store and service website.
+Full-stack prototype for a modern e-scooter shop and service platform inspired by `mads.gr`.
 
 - **Frontend**: React + Vite
 - **Backend**: ASP.NET Core 8 Web API
 - **Database**: PostgreSQL
 
-The project is inspired by the current public content structure of `mads.gr` and is built so you can quickly demo a modern style to your customer.
+## What is implemented
 
-## Project structure
+### Public e-shop experience
 
-```text
-.
-├── frontend/          # React UI
-├── backend/           # ASP.NET Core API
-├── docker-compose.yml # Full local stack (frontend + backend + postgres)
-└── README.md
-```
+- Homepage with:
+  - hero and branding
+  - category cards
+  - featured products
+  - full product preview list
+  - service highlights
+- Product catalog page (search + sorting + category routes)
+- Product details page (description + technical characteristics + stock state)
+- Cart + checkout request flow
+- Service booking flow for scooter repair/maintenance requests
+- About page based on current business information
 
-## What is included
+### Admin experience
 
-- Modern homepage sections:
-  - Hero
-  - Category cards
-  - Featured products
-  - Services
-  - Contact lead form
-- API endpoints:
-  - `GET /api/home`
-  - `GET /api/products`
-  - `GET /api/services`
-  - `POST /api/contact`
-- PostgreSQL-backed models with startup seed data
+- Admin dashboard summary
+- Admin product management:
+  - create product
+  - edit product
+  - set status (`Draft`, `Active`, `OutOfStock`, `Archived`)
+  - enable/disable publish state
+  - delete product
+  - manage characteristics/specs
+- Admin order management:
+  - list orders
+  - inspect order details
+  - update order status
+- Admin service booking management:
+  - list bookings
+  - update booking status
+  - save admin notes
 
-## Quick start with Docker (recommended for demo)
+## API overview
 
-```bash
-docker compose up --build
-```
+### Public APIs
 
-Services:
+- `GET /api/home`
+- `GET /api/shop/products`
+- `GET /api/shop/products/{slug}`
+- `GET /api/shop/services`
+- `POST /api/shop/bookings`
+- `POST /api/shop/checkout/orders`
 
-- Frontend: http://localhost:8080
-- Backend API: http://localhost:5048
-- Swagger: http://localhost:5048/swagger
-- PostgreSQL: localhost:5432 (`postgres` / `postgres`)
+### Admin APIs (require header `X-Admin-Api-Key`)
+
+- `GET /api/admin/products`
+- `GET /api/admin/products/{id}`
+- `POST /api/admin/products`
+- `PUT /api/admin/products/{id}`
+- `PATCH /api/admin/products/{id}/status`
+- `PATCH /api/admin/products/{id}/publish`
+- `DELETE /api/admin/products/{id}`
+- `GET /api/admin/orders`
+- `GET /api/admin/orders/{id}`
+- `PUT /api/admin/orders/{id}/status`
+- `GET /api/admin/service-bookings`
+- `PATCH /api/admin/service-bookings/{id}/status`
 
 ## Local development (without Docker)
 
 ### 1) Database
 
-Run PostgreSQL locally and create database `mads_redesign` (or change connection string).
+Run PostgreSQL locally and create database `mads_redesign` (or adjust connection string).
 
 Default backend connection string:
 
@@ -63,10 +84,10 @@ Default backend connection string:
 ```bash
 cd backend
 dotnet restore
-dotnet run
+dotnet run --launch-profile http
 ```
 
-API runs on `http://localhost:5048` by default.
+Backend runs on `http://localhost:5048`.
 
 ### 3) Frontend
 
@@ -77,10 +98,22 @@ cp .env.example .env
 npm run dev
 ```
 
-Vite UI runs on `http://localhost:5173`.
+Frontend runs on `http://localhost:5173`.
+
+## Environment variables
+
+### Backend
+
+- `ConnectionStrings__DefaultConnection` - PostgreSQL connection string
+- `Frontend__Origin` - allowed CORS origin for frontend
+- `Admin__ApiKey` - API key used for admin endpoints
+
+### Frontend (`frontend/.env`)
+
+- `VITE_API_BASE_URL` (example: `http://localhost:5048`)
+- `VITE_ADMIN_API_KEY` (must match backend `Admin__ApiKey`)
 
 ## Notes
 
-- Database initialization currently uses `EnsureCreated()` + `DataSeeder` for fast prototyping.
-- For production, move to EF Core migrations and proper deployment secrets.
-# mads
+- Database init currently uses `EnsureCreated()` + `DataSeeder` for quick prototyping.
+- For production, replace with EF Core migrations and secure secret management.
