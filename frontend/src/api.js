@@ -9,8 +9,21 @@ const handleResponse = async (response) => {
   return response.status === 204 ? null : response.json();
 };
 
-export const getHomeData = async () => {
-  const response = await fetch(`${API_BASE_URL}/api/home`);
+export const getHomeData = async ({ signal } = {}) => {
+  const response = await fetch(`${API_BASE_URL}/api/home`, { signal });
+  return handleResponse(response);
+};
+
+export const getAllProducts = async ({ signal } = {}) => {
+  const response = await fetch(`${API_BASE_URL}/api/products`, { signal });
+  return handleResponse(response);
+};
+
+export const getProductsByCategorySlug = async (slug, { signal } = {}) => {
+  const response = await fetch(
+    `${API_BASE_URL}/api/products/category/${encodeURIComponent(slug)}`,
+    { signal }
+  );
   return handleResponse(response);
 };
 

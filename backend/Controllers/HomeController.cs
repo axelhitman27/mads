@@ -35,6 +35,22 @@ public class HomeController(AppDbContext dbContext) : ControllerBase
                 p.Category != null ? p.Category.Name : string.Empty))
             .ToListAsync(cancellationToken);
 
+        var allProducts = await dbContext.Products
+            .AsNoTracking()
+            .Where(p => p.IsActive)
+            .OrderByDescending(p => p.IsFeatured)
+            .ThenBy(p => p.Name)
+            .Select(p => new ProductOverviewDto(
+                p.Id,
+                p.Name,
+                p.Slug,
+                p.ShortDescription,
+                p.Price,
+                p.ImageUrl,
+                p.IsFeatured,
+                p.CategoryId))
+            .ToListAsync(cancellationToken);
+
         var services = await dbContext.ServiceOfferings
             .AsNoTracking()
             .OrderBy(s => s.DisplayOrder)
@@ -54,6 +70,7 @@ public class HomeController(AppDbContext dbContext) : ControllerBase
             "Ανανεωμένο design, αξιόπιστα προϊόντα και τεχνική υποστήριξη από εξειδικευμένη ομάδα.",
             categories,
             featuredProducts,
+            allProducts,
             services
         );
 

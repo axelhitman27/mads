@@ -28,4 +28,15 @@ public record HomeDataResponse(
     string HeroSubtitle,
     IReadOnlyList<CategoryDto> Categories,
     IReadOnlyList<ProductDto> FeaturedProducts,
+    IReadOnlyList<ProductOverviewDto> AllProducts,
     IReadOnlyList<ServiceDto> Services);
+
+public record ProductOverviewDto(
+    int Id,
+    string Name,
+    string Slug,
+    string ShortDescription,
+    decimal Price,
+    string ImageUrl,
+    bool IsFeatured,
+    int CategoryId);

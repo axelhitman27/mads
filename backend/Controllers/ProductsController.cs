@@ -28,4 +28,33 @@ public class ProductsController(AppDbContext dbContext) : ControllerBase
 
         return Ok(products);
     }
+
+    [HttpGet("category/{slug}")]
+    public async Task<ActionResult<IEnumerable<Product>>> GetProductsByCategorySlug([FromRoute] string slug)
+    {
+        if (string.IsNullOrWhiteSpace(slug))
+        {
+            return BadRequest("Category slug is required.");
+        }
+
+        var categoryId = await dbContext.Categories
+            .AsNoTracking()
+            .Where(category => category.Slug == slug.Trim())
+            .Select(category => (int?)category.Id)
+            .FirstOrDefaultAsync();
+
+        if (!categoryId.HasValue)
+        {
+            return NotFound($"Category '{slug}' was not found.");
+        }
+
+        var products = await dbContext.Products
+            .AsNoTracking()
+            .Where(product => product.IsActive && product.CategoryId == categoryId.Value)
+            .OrderByDescending(product => product.IsFeatured)
+            .ThenBy(product => product.Name)
+            .ToListAsync();
+
+        return Ok(products);
+    }
 }

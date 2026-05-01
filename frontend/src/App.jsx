@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { getHomeData, sendContactMessage } from './api'
+import { getHomeData, getProductsByCategorySlug, sendContactMessage } from './api'
 import './App.css'
 
 const currencyFormatter = new Intl.NumberFormat('el-GR', {
@@ -15,7 +15,27 @@ const initialContactState = {
   message: '',
 }
 
-function App() {
+const ELECTRIC_SCOOTERS_SLUG = 'electric-scooters'
+const SCOOTER_SLUG_ALIASES = new Set([
+  ELECTRIC_SCOOTERS_SLUG,
+  'ηλεκτρικά-πατίνια',
+  'ilektrika-patinia',
+])
+
+const getCurrentPage = () => {
+  const pathSegments = window.location.pathname.split('/').filter(Boolean)
+  if (pathSegments[0] === 'product-category' && pathSegments[1]) {
+    const requestedSlug = decodeURIComponent(pathSegments[1]).trim().toLowerCase()
+    const normalizedSlug = SCOOTER_SLUG_ALIASES.has(requestedSlug)
+      ? ELECTRIC_SCOOTERS_SLUG
+      : requestedSlug
+    return { type: 'category', slug: normalizedSlug }
+  }
+
+  return { type: 'home' }
+}
+
+function HomePage() {
   const [homeData, setHomeData] = useState(null)
   const [allProducts, setAllProducts] = useState([])
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -94,7 +114,8 @@ function App() {
       <header className="topbar">
         <div className="brand">{homeData.brand}</div>
         <nav className="menu">
-          <a href="#products">Products</a>
+          <a href="/">Home</a>
+          <a href="/product-category/electric-scooters">E-Scooters</a>
           <a href="#services">Services</a>
           <a href="#contact">Contact</a>
         </nav>
@@ -106,7 +127,7 @@ function App() {
           <h1>{homeData.heroTitle}</h1>
           <p className="lead">{homeData.heroSubtitle}</p>
           <div className="cta-group">
-            <a href="#products" className="btn btn-primary">
+            <a href="/product-category/electric-scooters" className="btn btn-primary">
               Explore Scooters
             </a>
             <a href="#services" className="btn btn-secondary">
@@ -124,6 +145,9 @@ function App() {
                 <div className="card-body">
                   <h3>{category.name}</h3>
                   <p>{category.description}</p>
+                  <a className="category-link" href={`/product-category/${category.slug}`}>
+                    View category
+                  </a>
                 </div>
               </article>
             ))}
@@ -181,7 +205,7 @@ function App() {
               <article key={product.id} className="card product-card compact-card">
                 <div className="card-body">
                   <h3>{product.name}</h3>
-                  <p>{product.shortDescription}</p>
+                  <p>{product.shortDescription ?? product.description}</p>
                   <strong>{currencyFormatter.format(product.price)}</strong>
                 </div>
               </article>
@@ -257,6 +281,167 @@ function App() {
       </footer>
     </div>
   )
+}
+
+function ProductCategoryPage({ slug }) {
+  const [homeData, setHomeData] = useState(null)
+  const [products, setProducts] = useState([])
+  const [sortBy, setSortBy] = useState('featured')
+  const [loading, setLoading] = useState(true)
+  const [errorMessage, setErrorMessage] = useState('')
+
+  useEffect(() => {
+    const abortController = new AbortController()
+
+    const loadData = async () => {
+      setLoading(true)
+      setErrorMessage('')
+      try {
+        const [home, categoryProducts] = await Promise.all([
+          getHomeData({ signal: abortController.signal }),
+          getProductsByCategorySlug(slug, { signal: abortController.signal }),
+        ])
+        setHomeData(home)
+        setProducts(categoryProducts)
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          setErrorMessage('Could not load category products. Please check backend API status.')
+        }
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadData()
+    return () => abortController.abort()
+  }, [slug])
+
+  const category = useMemo(
+    () => homeData?.categories?.find((item) => item.slug === slug) ?? null,
+    [homeData, slug],
+  )
+
+  const sortedProducts = useMemo(() => {
+    const sortableProducts = [...products]
+
+    switch (sortBy) {
+      case 'price-asc':
+        return sortableProducts.sort((a, b) => a.price - b.price)
+      case 'price-desc':
+        return sortableProducts.sort((a, b) => b.price - a.price)
+      case 'name':
+        return sortableProducts.sort((a, b) => a.name.localeCompare(b.name, 'el'))
+      case 'featured':
+      default:
+        return sortableProducts.sort((a, b) => {
+          if (a.isFeatured === b.isFeatured) {
+            return a.name.localeCompare(b.name, 'el')
+          }
+          return a.isFeatured ? -1 : 1
+        })
+    }
+  }, [products, sortBy])
+
+  if (loading) {
+    return <main className="page-status">Loading category products...</main>
+  }
+
+  if (errorMessage) {
+    return <main className="page-status error">{errorMessage}</main>
+  }
+
+  return (
+    <div className="layout">
+      <header className="topbar">
+        <div className="brand">{homeData?.brand ?? 'MADS'}</div>
+        <nav className="menu">
+          <a href="/">Home</a>
+          <a href="/product-category/electric-scooters">E-Scooters</a>
+          <a href="/#services">Services</a>
+          <a href="/#contact">Contact</a>
+        </nav>
+      </header>
+
+      <main>
+        <section className="category-hero">
+          <p className="breadcrumbs">
+            <a href="/">Αρχική</a> / <span>Ηλεκτρικά Πατίνια</span>
+          </p>
+          <h1>{category?.name ?? 'Ηλεκτρικά Πατίνια'}</h1>
+          <p>{category?.description ?? 'Ανακαλύψτε νέες αφίξεις και best sellers σε e-scooters.'}</p>
+        </section>
+
+        <section className="section">
+          <div className="shop-layout">
+            <aside className="shop-sidebar">
+              <h2>Κατηγορίες</h2>
+              <div className="category-link-list">
+                {homeData?.categories?.map((item) => (
+                  <a
+                    key={item.id}
+                    href={`/product-category/${item.slug}`}
+                    className={item.slug === slug ? 'active' : ''}
+                  >
+                    {item.name}
+                  </a>
+                ))}
+              </div>
+            </aside>
+
+            <div className="shop-content">
+              <div className="products-toolbar">
+                <p>
+                  Εμφανίζονται <strong>{sortedProducts.length}</strong> προϊόντα
+                </p>
+                <label className="sort-field">
+                  Ταξινόμηση
+                  <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+                    <option value="featured">Προτεινόμενα</option>
+                    <option value="price-asc">Τιμή: Χαμηλή σε Υψηλή</option>
+                    <option value="price-desc">Τιμή: Υψηλή σε Χαμηλή</option>
+                    <option value="name">Αλφαβητικά</option>
+                  </select>
+                </label>
+              </div>
+
+              <div className="grid products">
+                {sortedProducts.map((product) => (
+                  <article key={product.id} className="card product-card category-product-card">
+                    <img src={product.imageUrl} alt={product.name} />
+                    <div className="card-body">
+                      <h3>{product.name}</h3>
+                      <p>{product.shortDescription ?? product.description}</p>
+                      <div className="price-row">
+                        <strong>{currencyFormatter.format(product.price)}</strong>
+                        <span>{product.isFeatured ? 'Featured' : 'In stock'}</span>
+                      </div>
+                      <button type="button" className="btn btn-secondary product-cta">
+                        Προσθήκη στο καλάθι
+                      </button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="footer">
+        <p>Demo category page inspired by mads.gr product category layout</p>
+      </footer>
+    </div>
+  )
+}
+
+function App() {
+  const currentPage = useMemo(() => getCurrentPage(), [])
+
+  if (currentPage.type === 'category') {
+    return <ProductCategoryPage slug={currentPage.slug} />
+  }
+
+  return <HomePage />
 }
 
 export default App
