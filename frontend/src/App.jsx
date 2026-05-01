@@ -32,6 +32,10 @@ const getCurrentPage = () => {
     return { type: 'category', slug: normalizedSlug }
   }
 
+  if (pathSegments[0] === 'about-us') {
+    return { type: 'about' }
+  }
+
   return { type: 'home' }
 }
 
@@ -116,6 +120,7 @@ function HomePage() {
         <nav className="menu">
           <a href="/">Home</a>
           <a href="/product-category/electric-scooters">E-Scooters</a>
+          <a href="/about-us">About Us</a>
           <a href="#services">Services</a>
           <a href="#contact">Contact</a>
         </nav>
@@ -357,6 +362,7 @@ function ProductCategoryPage({ slug }) {
         <nav className="menu">
           <a href="/">Home</a>
           <a href="/product-category/electric-scooters">E-Scooters</a>
+          <a href="/about-us">About Us</a>
           <a href="/#services">Services</a>
           <a href="/#contact">Contact</a>
         </nav>
@@ -434,11 +440,129 @@ function ProductCategoryPage({ slug }) {
   )
 }
 
+function AboutUsPage() {
+  return (
+    <div className="layout">
+      <header className="topbar">
+        <div className="brand">MADS</div>
+        <nav className="menu">
+          <a href="/">Home</a>
+          <a href="/product-category/electric-scooters">E-Scooters</a>
+          <a href="/about-us">About Us</a>
+          <a href="/#services">Services</a>
+          <a href="/#contact">Contact</a>
+        </nav>
+      </header>
+
+      <main className="about-page">
+        <section className="about-hero">
+          <p className="eyebrow">Σχετικά με εμάς</p>
+          <h1>Η τεχνογνωσία συναντά την εξέλιξη</h1>
+          <p>
+            Η MADS ιδρύθηκε το 2017 και δραστηριοποιείται στον χώρο των μπαταριών παντός τύπου.
+            Από το 2018 εξειδικευόμαστε στην επισκευή, συντήρηση και βελτίωση ηλεκτρικών
+            πατινιών και ηλεκτρικών σκούτερ, προσφέροντας ολοκληρωμένες λύσεις για κάθε ανάγκη.
+          </p>
+        </section>
+
+        <section className="section">
+          <div className="about-grid">
+            <article className="card about-card">
+              <div className="card-body">
+                <h2>Η αποστολή μας</h2>
+                <p>
+                  Ως επίσημη αντιπροσωπεία, διαθέτουμε πλήρη γκάμα ηλεκτρικών πατινιών και
+                  ηλεκτρικών σκούτερ, με τεχνική υποστήριξη, κάλυψη εγγύησης και γνήσια
+                  ανταλλακτικά για όλα τα προϊόντα.
+                </p>
+              </div>
+            </article>
+
+            <article className="card about-card">
+              <div className="card-body">
+                <h2>Γιατί MADS</h2>
+                <p>
+                  Με εμπειρία στις μπαταρίες και τεχνογνωσία στα ηλεκτρικά οχήματα, προσφέρουμε
+                  ασφάλεια, ποιότητα και αξιόπιστη εξυπηρέτηση πριν και μετά την αγορά.
+                </p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section className="section">
+          <article className="card about-card">
+            <div className="card-body">
+              <h2>Οι υπηρεσίες μας</h2>
+              <ul className="about-list">
+                <li>Πώληση ηλεκτρικών πατινιών και ηλεκτρικών σκούτερ</li>
+                <li>Τεχνική υποστήριξη, επισκευές και συντήρηση</li>
+                <li>Κάλυψη εγγύησης για όλα τα προϊόντα</li>
+                <li>Μεγάλη ποικιλία γνήσιων ανταλλακτικών και μπαταριών</li>
+                <li>Εξειδικευμένες λύσεις βελτίωσης επιδόσεων και αυτονομίας</li>
+              </ul>
+            </div>
+          </article>
+        </section>
+
+        <section className="section">
+          <div className="about-grid">
+            <article className="card about-card">
+              <div className="card-body">
+                <h2>Κατάστημα</h2>
+                <p>Λεωνίδα Ιασωνίδου 23, Θεσσαλονίκη</p>
+                <p>Τηλέφωνο: <a className="inline-link" href="tel:2310262805">2310 262805</a></p>
+                <p>Email: <a className="inline-link" href="mailto:info@mads.gr">info@mads.gr</a></p>
+              </div>
+            </article>
+
+            <article className="card about-card">
+              <div className="card-body">
+                <h2>Ωράριο λειτουργίας</h2>
+                <ul className="hours-list">
+                  <li><span>Δευτέρα</span><span>09:00 - 16:00</span></li>
+                  <li><span>Τρίτη</span><span>09:00 - 20:00</span></li>
+                  <li><span>Τετάρτη</span><span>09:00 - 16:00</span></li>
+                  <li><span>Πέμπτη</span><span>09:00 - 20:00</span></li>
+                  <li><span>Παρασκευή</span><span>09:00 - 20:00</span></li>
+                  <li><span>Σάββατο</span><span>10:00 - 15:00</span></li>
+                  <li><span>Κυριακή</span><span>Κλειστά</span></li>
+                </ul>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section className="section">
+          <article className="about-cta">
+            <h2>Κλείστε ραντεβού για service</h2>
+            <p>
+              Επικοινωνήστε μαζί μας για να γνωρίσετε τα προϊόντα και τις υπηρεσίες μας ή για να
+              κλείσετε άμεσα το επόμενο service του πατινιού σας.
+            </p>
+            <a className="btn btn-primary" href="tel:2310262805">
+              Θέλω να κλείσω ραντεβού
+            </a>
+          </article>
+        </section>
+      </main>
+
+      <footer className="footer">
+        <p>Στη MADS, η ηλεκτροκίνηση γίνεται υπόθεση ζωής.</p>
+      </footer>
+    </div>
+  )
+}
+
 function App() {
   const currentPage = useMemo(() => getCurrentPage(), [])
 
   if (currentPage.type === 'category') {
     return <ProductCategoryPage slug={currentPage.slug} />
+  }
+
+  if (currentPage.type === 'about') {
+    return <AboutUsPage />
   }
 
   return <HomePage />
