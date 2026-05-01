@@ -1,0 +1,6 @@
+.dotnet/
+frontend/node_modules/
+frontend/dist/
+backend/bin/
+backend/obj/
+postgres-data/
